@@ -1,0 +1,47 @@
+{
+    "name": "201created/security",
+    "description": "Security component used in 201Created projects",
+    "type": "library",
+    "license": "MIT",
+    "version": "0.1.0",
+    "authors": [
+        {
+            "name": "Marko Vujnovic",
+            "email": "ms@201created.de"
+        }
+    ],
+    "require": {
+        "php": "^7.4",
+        "201created/collections": "^0.1",
+        "201created/ddd": "^0.1",
+        "doctrine/doctrine-bundle": "^2.0",
+        "doctrine/orm": "^2.7",
+        "stof/doctrine-extensions-bundle": "^1.4",
+        "symfony/console": "^5.0",
+        "symfony/security-bundle": "^5.0"
+    },
+    "require-dev": {
+        "phpspec/prophecy-phpunit": "^2.0",
+        "phpunit/phpunit": "^9.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "C201\\Security\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "C201\\Security\\Tests\\": "tests/"
+        }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:c201/201created-collections.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:c201/201created-ddd.git"
+        }
+    ]
+}
