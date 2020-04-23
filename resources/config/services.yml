@@ -1,73 +1,91 @@
 services:
-    c201_security.user_repository:
+    c201_security.infrastructure.domain.doctrine.symfony_user_repository:
         class: C201\Security\Infrastructure\Domain\Doctrine\DoctrineSymfonyUserRepository
         public: true
         arguments:
             - '@Doctrine\ORM\EntityManagerInterface'
 
     C201\Security\Infrastructure\Domain\Doctrine\DoctrineSymfonyUserRepository:
-        alias: c201_security.user_repository
+        alias: c201_security.infrastructure.domain.doctrine.symfony_user_repository
 
     C201\Security\Infrastructure\Domain\Symfony\SymfonyUserRepository:
-        alias: c201_security.user_repository
+        alias: c201_security.infrastructure.domain.doctrine.symfony_user_repository
 
     C201\Security\Domain\UserRepository:
-        alias: c201_security.user_repository
+        alias: c201_security.infrastructure.domain.doctrine.symfony_user_repository
 
-    c201_security.create_user:
+    c201_security.infrastructure.application.symfony.create_user:
         class: C201\Security\Infrastructure\Application\Symfony\SymfonyCreateUser
         public: false
         arguments:
             - '@c201_ddd.transactions.transaction_manager'
             - '@c201_ddd.events.event_registry'
             - '@Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface'
-            - '@c201_security.user_repository'
+            - '@c201_security.infrastructure.domain.doctrine.symfony_user_repository'
 
     C201\Security\Infrastructure\Application\Symfony\SymfonyCreateUser:
-        alias: c201_security.create_user
+        alias: c201_security.infrastructure.application.symfony.create_user
 
     C201\Security\Application\CreateUser:
-        alias: c201_security.create_user
+        alias: c201_security.infrastructure.application.symfony.create_user
 
-    c201_security.change_password:
-        class: C201\Security\Infrastructure\Application\Symfony\SymfonyChangePassword
+    c201_security.infrastructure.domain.symfony.encode_password_for_user:
+        class: C201\Security\Infrastructure\Domain\Symfony\SymfonyEncodePasswordForUser
+        public: false
+        arguments:
+            - '@Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface'
+
+    C201\Security\Infrastructure\Domain\Symfony\SymfonyEncodePasswordForUser:
+        alias: c201_security.infrastructure.domain.symfony.encode_password_for_user
+
+    C201\Security\Domain\EncodePasswordForUser:
+        alias: c201_security.infrastructure.domain.symfony.encode_password_for_user
+    
+    c201_security.infrastructure.domain.symfony.change_password_for_user:
+        class: C201\Security\Domain\ChangePasswordForUser
+        public: false
+        arguments:
+            - '@c201_ddd.events.event_registry'
+            - '@c201_security.infrastructure.domain.symfony.encode_password_for_user'
+
+    C201\Security\Domain\ChangePasswordForUser:
+        alias: c201_security.infrastructure.domain.symfony.change_password_for_user
+    
+    c201_security.infrastructure.application.doctrine.symfony_change_password:
+        class: \C201\Security\Application\ChangePassword
         public: false
         arguments:
             - '@c201_ddd.transactions.transaction_manager'
-            - '@c201_ddd.events.event_registry'
-            - '@Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface'
-            - '@c201_security.user_repository'
+            - '@c201_security.infrastructure.domain.doctrine.symfony_user_repository'
+            - '@c201_security.infrastructure.domain.symfony.change_password_for_user'
 
-    C201\Security\Infrastructure\Application\Symfony\SymfonyChangePassword:
-        alias: c201_security.change_password
+    C201\Security\Application\ChangePassword:
+        alias: c201_security.infrastructure.application.doctrine.symfony_change_password
 
-    C201\Security\Application\ChangePasswordangePassword:
-        alias: c201_security.change_password
-
-    c201_security.security_helper:
+    c201_security.infrastructure.application.symfony.security_helper:
         class: C201\Security\Infrastructure\Application\Symfony\SymfonySecurity
         public: true
         arguments:
             - '@Symfony\Component\Security\Core\Security'
 
     C201\Security\Infrastructure\Application\Symfony\SymfonySecurity:
-        alias: c201_security.security_helper
+        alias: c201_security.infrastructure.application.symfony.security_helper
 
     C201\Security\Application\Security:
-        alias: c201_security.security_helper
+        alias: c201_security.infrastructure.application.symfony.security_helper
 
-    c201_security.create_user_command:
+    c201_security.infrastructure.application.symfony.create_user_command:
         class: C201\Security\Infrastructure\Delivery\Cli\Symfony\CreateUserCommand
         public: false
         tags:
             - { name: 'console.command', command: 'c201:security:create-user' }
         arguments:
-            - '@c201_security.create_user'
+            - '@c201_security.infrastructure.application.symfony.create_user'
 
-    c201_security.change_password_command:
+    c201_security.infrastructure.application.doctrine.symfony_change_password_command:
         class: C201\Security\Infrastructure\Delivery\Cli\Symfony\ChangePasswordCommand
         public: false
         tags:
             - { name: 'console.command', command: 'c201:security:change-password' }
         arguments:
-            - '@c201_security.change_password'
+            - '@c201_security.infrastructure.application.doctrine.symfony_change_password'

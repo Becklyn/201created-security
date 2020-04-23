@@ -56,4 +56,12 @@ trait SymfonyUserTestTrait
     {
         $this->symfonyUserRepository->add($user)->shouldBeCalled();
     }
+
+    /**
+     * @return ObjectProphecy|SymfonyUser
+     */
+    protected function givenASymfonyUser(): ObjectProphecy
+    {
+        return $this->prophesize(SymfonyUser::class);
+    }
 }
