@@ -19,7 +19,7 @@ class ChangePasswordCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('app:security:change-password')
+            ->setName('c201:security:change-password')
             ->addArgument('email', InputArgument::REQUIRED, 'email of user whose password to change')
             ->addArgument('password', InputArgument::REQUIRED, 'new password to set')
         ;

@@ -21,6 +21,11 @@ trait UserTestTrait
         return uniqid();
     }
 
+    protected function givenAUserPassword(): string
+    {
+        return uniqid();
+    }
+
     protected function thenUserNotFoundExceptionShouldBeThrown(): void
     {
         $this->expectException(UserNotFoundException::class);
