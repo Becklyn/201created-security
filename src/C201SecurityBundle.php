@@ -16,19 +16,10 @@ class C201SecurityBundle extends Bundle
     {
         parent::build($container);
 
-        $namespaces = ['C201\Security\Infrastructure\Domain\Doctrine'];
-        $directories = [realpath(__DIR__ . '/Infrastructure/Store/Doctrine')];
-        $managerParameters = [];
-        $enabledParameter = false;
-        $aliasMap = [];
-        $container->addCompilerPass(
-            DoctrineOrmMappingsPass::createAnnotationMappingDriver(
-                $namespaces,
-                $directories,
-                $managerParameters,
-                $enabledParameter,
-                $aliasMap
-            )
-        );
+        $mappings = [
+            realpath(__DIR__ . '/../resources/config/doctrine-mapping') => 'C201\Security\Infrastructure\Domain\Doctrine',
+        ];
+
+        $container->addCompilerPass(DoctrineOrmMappingsPass::createXmlMappingDriver($mappings));
     }
 }
