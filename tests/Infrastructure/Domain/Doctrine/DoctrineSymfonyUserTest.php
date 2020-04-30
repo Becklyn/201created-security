@@ -4,6 +4,8 @@ namespace C201\Security\Tests\Infrastructure\Domain\Doctrine;
 
 use C201\Ddd\Events\Domain\DomainEvent;
 use C201\Security\Domain\PasswordChanged;
+use C201\Security\Domain\PasswordReset;
+use C201\Security\Domain\PasswordResetRequested;
 use C201\Security\Domain\Role;
 use C201\Security\Domain\RoleAddedToUser;
 use C201\Security\Domain\RoleRemovedFromUser;
@@ -246,5 +248,62 @@ class DoctrineSymfonyUserTest extends TestCase
 
         $user->enable();
         $this->assertEmpty($user->dequeueEvents());
+    }
+
+    public function testRequestPasswordResetRaisesPasswordResetRequestedEvent(): void
+    {
+        $user = DoctrineSymfonyUser::create($this->givenAUserId(), $this->givenAnUserEmail(), $this->givenAUserPassword());
+        $user->dequeueEvents();
+
+        $token = $this->givenAPasswordResetToken();
+        $user->requestPasswordReset($token);
+        $events = Collection::make($user->dequeueEvents());
+        $this->assertTrue($events->contains(fn(PasswordResetRequested $event) => $event->aggregateId()->equals($user->id()) && $event->token() === $token));
+    }
+
+    public function testIsPasswordResetValidReturnsTrueIfValidTokenAndNonExpiredTokenExpirationMinutesArePassed(): void
+    {
+        $token = $this->givenAPasswordResetToken();
+        $tokenExpirationInMinutes = 60;
+
+        $user = DoctrineSymfonyUser::create($this->givenAUserId(), $this->givenAnUserEmail(), $this->givenAUserPassword());
+        $user->requestPasswordReset($token);
+
+        $this->assertTrue($user->isPasswordResetValid($token, $tokenExpirationInMinutes));
+    }
+
+    public function testIsPasswordResetValidReturnsFalseIfInvalidTokenIsPassed(): void
+    {
+        $token = $this->givenAPasswordResetToken();
+        $invalidToken = $this->givenAPasswordResetToken();
+        $this->assertNotEquals($token, $invalidToken);
+        $tokenExpirationInMinutes = 60;
+
+        $user = DoctrineSymfonyUser::create($this->givenAUserId(), $this->givenAnUserEmail(), $this->givenAUserPassword());
+        $user->requestPasswordReset($token);
+
+        $this->assertFalse($user->isPasswordResetValid($invalidToken, $tokenExpirationInMinutes));
+    }
+
+    public function testIsPasswordResetValidReturnsFalseIfExpiredTokenExpirationMinutesArePassed(): void
+    {
+        $token = $this->givenAPasswordResetToken();
+        $tokenExpirationInMinutes = 0;
+
+        $user = DoctrineSymfonyUser::create($this->givenAUserId(), $this->givenAnUserEmail(), $this->givenAUserPassword());
+        $user->requestPasswordReset($token);
+
+        sleep(1);
+        $this->assertFalse($user->isPasswordResetValid($token, $tokenExpirationInMinutes));
+    }
+
+    public function testResetPasswordRaisesPasswordResetEvent(): void
+    {
+        $user = DoctrineSymfonyUser::create($this->givenAUserId(), $this->givenAnUserEmail(), $this->givenAUserPassword());
+        $user->dequeueEvents();
+
+        $user->resetPassword($this->givenAUserPassword());
+        $events = Collection::make($user->dequeueEvents());
+        $this->assertTrue($events->contains(fn(PasswordReset $event) => $event->aggregateId()->equals($user->id())));
     }
 }
