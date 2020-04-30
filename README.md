@@ -20,6 +20,7 @@ Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
 C201\Security\C201SecurityBundle::class => ['all' => true],
 ```
 - Run `php bin/console doctrine:migrations:diff` to create a Doctrine migration for the User entity. Check the migrations file and manually remove anything unrelated to the c201_users table. Execute the migration by running `php bin/console doctrine:migrations:migrate`
+- Set the 'secret' configuration option, see below for details.
 - The bundle uses Symfony Mailer to send email. If you wish to use any feature requiring email dispatch, create a mailer.yaml file in the config/packages folder with the following contents:
 ```
 framework:
@@ -41,11 +42,18 @@ c201_security:
  ```
  
 ### Available Options ###
+
+### secret ###
+
+- Type: string
+- Default: none, value required
+
+This will be used for hashing password reset tokens and other similar purposes. It is recommended to set this option to the APP_SECRET .env var.
  
 #### reset_password.route ####
  
- - Type: string
- - Default: ''
+- Type: string
+- Default: ''
  
 Password reset functionality entails sending an email to the user, containing a link to a controller GET action handling the reset. To generate the link, the action must have a named route defined for it accepting a single parameter named 'token'. For example:
 ```
@@ -69,8 +77,8 @@ If this option is not set, requesting a password reset will throw an exception.
 
 #### reset_password.email_from ####
  
- - Type: string
- - Default: ''
+- Type: string
+- Default: ''
  
 Email address appearing in the From: field of reset password emails.
  
@@ -78,8 +86,8 @@ If this option is not set, requesting a password reset will throw an exception.
  
 #### reset_password.email_subject ####
   
-  - Type: string
-  - Default: ''
+- Type: string
+- Default: ''
   
 Subject of reset password emails.
   

@@ -18,6 +18,9 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
+            ->scalarNode('secret')
+            ->isRequired()
+            ->end()
             ->arrayNode('reset_password')
             ->children()
             ->scalarNode('route')

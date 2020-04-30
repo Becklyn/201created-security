@@ -122,6 +122,8 @@ services:
     c201_security.domain.hash_password_reset_token:
         class: C201\Security\Domain\HashPasswordResetToken
         public: false
+        arguments:
+            - ~
 
     C201\Security\Domain\HashPasswordResetToken:
         alias: c201_security.domain.hash_password_reset_token
@@ -142,9 +144,9 @@ services:
         arguments:
             - '@Symfony\Component\Mailer\MailerInterface'
             - '@Symfony\Component\Routing\Generator\UrlGeneratorInterface'
-            - ''
-            - ''
-            - ''
+            - ~
+            - ~
+            - ~
 
     C201\Security\Infrastructure\Application\Symfony\SymfonyMailerNotifyPasswordReset:
         alias: c201_security.infrastructure.application.symfony.mailer_notify_password_reset
@@ -180,7 +182,7 @@ services:
         public: true
         arguments:
             - '@c201_security.infrastructure.domain.doctrine.find_user_for_password_reset'
-            - ''
+            - ~
 
     C201\Security\Application\FindEmailForPasswordReset:
         alias: c201_security.infrastructure.application.doctrine.find_user_for_password_reset

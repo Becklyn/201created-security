@@ -32,5 +32,8 @@ class C201SecurityExtension extends Extension
         $definition = $container->getDefinition('c201_security.infrastructure.application.doctrine.find_user_for_password_reset');
         $definition->replaceArgument(1, $config['reset_password']['request_expiration_minutes']);
         $container->setParameter('reset_password.request_expiration_minutes', $config['reset_password']['request_expiration_minutes']);
+
+        $definition = $container->getDefinition('c201_security.domain.hash_password_reset_token');
+        $definition->replaceArgument(0, $config['secret']);
     }
 }

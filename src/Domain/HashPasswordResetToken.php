@@ -8,8 +8,15 @@ namespace C201\Security\Domain;
  */
 class HashPasswordResetToken
 {
+    private string $salt;
+
+    public function __construct(string $salt)
+    {
+        $this->salt = $salt;
+    }
+
     public function execute(string $plainToken): string
     {
-        return sha1($plainToken);
+        return sha1($this->salt . $plainToken);
     }
 }

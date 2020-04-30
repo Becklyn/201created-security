@@ -10,10 +10,11 @@ class HashPasswordResetTokenTest extends TestCase
 {
     use UserTestTrait;
 
-    public function testHashPasswordResetTokenReturnsSha1OfPlainToken(): void
+    public function testHashPasswordResetTokenReturnsSaltedSha1OfPlainToken(): void
     {
         $token = $this->givenAPasswordResetToken();
-        $fixture = new HashPasswordResetToken();
-        $this->assertEquals(sha1($token), $fixture->execute($token));
+        $salt = uniqid();
+        $fixture = new HashPasswordResetToken($salt);
+        $this->assertEquals(sha1($salt . $token), $fixture->execute($token));
     }
 }
