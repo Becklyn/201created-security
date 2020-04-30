@@ -4,6 +4,8 @@ namespace C201\Security\Infrastructure\Domain\Doctrine;
 
 use C201\Ddd\Events\Domain\EventProviderCapabilities;
 use C201\Security\Domain\PasswordChanged;
+use C201\Security\Domain\PasswordReset;
+use C201\Security\Domain\PasswordResetRequested;
 use C201\Security\Domain\Role;
 use C201\Security\Domain\RoleAddedToUser;
 use C201\Security\Domain\RoleRemovedFromUser;
@@ -67,6 +69,16 @@ class DoctrineSymfonyUser implements SymfonyUser
      * @ORM\Column(type="json")
      */
     protected array $roles = [];
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected ?string $passwordResetToken = null;
+
+    /**
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     */
+    protected ?\DateTimeImmutable $passwordResetRequestTs = null;
 
     /**
      * @ORM\Column(type="datetime_immutable", nullable=false)
@@ -168,6 +180,42 @@ class DoctrineSymfonyUser implements SymfonyUser
             $this->enabled = false;
             $this->raiseEvent(new UserDisabled($this->nextEventIdentity(), new \DateTimeImmutable(), $this->id()));
         }
+        return $this;
+    }
+
+    public function requestPasswordReset(string $passwordResetToken): self
+    {
+        $this->passwordResetToken = $passwordResetToken;
+        $this->passwordResetRequestTs = new \DateTimeImmutable();
+        $this->raiseEvent(
+            new PasswordResetRequested($this->nextEventIdentity(), new \DateTimeImmutable(), $this->id(), $passwordResetToken, $this->passwordResetRequestTs)
+        );
+        return $this;
+    }
+
+    public function isPasswordResetValid(string $passwordResetToken, int $tokenExpirationMinutes): bool
+    {
+        if ($passwordResetToken !== $this->passwordResetToken) {
+            return false;
+        }
+
+        if ($this->passwordResetRequestTs === null) {
+            return false;
+        }
+
+        if (time() - $this->passwordResetRequestTs->getTimestamp() > $tokenExpirationMinutes * 60) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function resetPassword(string $newPassword): self
+    {
+        $this->password = $newPassword;
+        $this->passwordResetToken = null;
+        $this->passwordResetRequestTs = null;
+        $this->raiseEvent(new PasswordReset($this->nextEventIdentity(), new \DateTimeImmutable(), $this->id()));
         return $this;
     }
 

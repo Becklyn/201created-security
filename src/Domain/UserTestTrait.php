@@ -27,7 +27,7 @@ trait UserTestTrait
 
     protected function givenAnUserEmail(): string
     {
-        return uniqid();
+        return uniqid() . '@' . uniqid() . '.com';
     }
 
     protected function givenAUserPassword(): string
@@ -48,7 +48,7 @@ trait UserTestTrait
         /** @var User|ObjectProphecy $user */
         $user = $this->prophesize(User::class);
         $user->email()->willReturn($email);
-        $this->userRepository->findOneByEmail($email)->willReturn($user);
+        $this->userRepository->findOneByEmail($email)->willReturn($user->reveal());
         return $user;
     }
 
@@ -71,5 +71,55 @@ trait UserTestTrait
     protected function thenPasswordShouldBeChangedForUser(ObjectProphecy $user, string $password): void
     {
         $user->changePassword($password)->shouldBeCalled();
+    }
+
+    protected function givenAPasswordResetToken(): string
+    {
+        return uniqid();
+    }
+
+    protected function givenAPasswordResetTokenExpirationInMinutes(): int
+    {
+        return random_int(1, 1000);
+    }
+
+    /**
+     * @return ObjectProphecy|User
+     */
+    protected function givenAUserCanBeFoundByPasswordResetToken($token): ObjectProphecy
+    {
+        /** @var User|ObjectProphecy $user */
+        $user = $this->prophesize(User::class);
+        $this->userRepository->findOneByPasswordResetToken($token)->willReturn($user->reveal());
+        return $user;
+    }
+
+    /**
+     * @param ObjectProphecy|User $user
+     */
+    protected function givenPasswordResetIsValidForUser(ObjectProphecy $user, string $token, int $expirationMinutes): void
+    {
+        $user->isPasswordResetValid($token, $expirationMinutes)->willReturn(true);
+    }
+
+    /**
+     * @param ObjectProphecy|User $user
+     */
+    protected function givenPasswordResetIsNotValidForUser(ObjectProphecy $user, string $token, int $expirationMinutes): void
+    {
+        $user->isPasswordResetValid($token, $expirationMinutes)->willReturn(false);
+    }
+
+    protected function givenAPasswordResetRequestTs(): \DateTimeImmutable
+    {
+        return new \DateTimeImmutable();
+    }
+
+    /**
+     * @param ObjectProphecy|User $user
+     */
+    protected function givenUserHasEmail(ObjectProphecy $user, string $email): void
+    {
+        $user->email()->willReturn($email);
     }
 }

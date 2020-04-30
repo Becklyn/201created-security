@@ -16,7 +16,7 @@ services:
 
     c201_security.infrastructure.application.symfony.create_user:
         class: C201\Security\Infrastructure\Application\Symfony\SymfonyCreateUser
-        public: false
+        public: true
         arguments:
             - '@c201_ddd.transactions.transaction_manager'
             - '@c201_ddd.events.event_registry'
@@ -53,7 +53,7 @@ services:
     
     c201_security.infrastructure.application.doctrine.symfony_change_password:
         class: C201\Security\Application\ChangePassword
-        public: false
+        public: true
         arguments:
             - '@c201_ddd.transactions.transaction_manager'
             - '@c201_security.infrastructure.domain.doctrine.symfony_user_repository'
@@ -104,10 +104,104 @@ services:
 
     c201_security.infrastructure.application.symfony.is_password_valid:
         class: C201\Security\Application\IsPasswordValid
-        public: false
+        public: true
         arguments:
             - '@c201_security.infrastructure.domain.doctrine.symfony_user_repository'
             - '@c201_security.infrastructure.domain.symfony.is_password_valid_for_user'
 
     C201\Security\Application\IsPasswordValid:
         alias: c201_security.infrastructure.application.symfony.is_password_valid
+
+    c201_security.domain.generate_password_reset_token:
+        class: C201\Security\Domain\GeneratePasswordResetToken
+        public: false
+
+    C201\Security\Domain\GeneratePasswordResetToken:
+        alias: c201_security.domain.generate_password_reset_token
+
+    c201_security.domain.hash_password_reset_token:
+        class: C201\Security\Domain\HashPasswordResetToken
+        public: false
+
+    C201\Security\Domain\HashPasswordResetToken:
+        alias: c201_security.domain.hash_password_reset_token
+
+    c201_security.domain.request_password_reset_for_user:
+        class: C201\Security\Domain\RequestPasswordResetForUser
+        public: false
+        arguments:
+            - '@c201_ddd.events.event_registry'
+            - '@c201_security.domain.hash_password_reset_token'
+
+    C201\Security\Domain\RequestPasswordResetForUser:
+        alias: c201_security.domain.request_password_reset_for_user
+
+    c201_security.infrastructure.application.symfony.mailer_notify_password_reset:
+        class: C201\Security\Infrastructure\Domain\Symfony\SymfonyMailerNotifyPasswordReset
+        public: false
+        arguments:
+            - '@Symfony\Component\Mailer\MailerInterface'
+            - '@Symfony\Component\Routing\Generator\UrlGeneratorInterface'
+            - ''
+            - ''
+            - ''
+
+    C201\Security\Infrastructure\Application\Symfony\SymfonyMailerNotifyPasswordReset:
+        alias: c201_security.infrastructure.application.symfony.mailer_notify_password_reset
+
+    C201\Security\Application\NotifyPasswordReset:
+        alias: c201_security.infrastructure.application.symfony.mailer_notify_password_reset
+
+    c201_security.infrastructure.application.symfony.request_password_reset:
+        class: C201\Security\Application\RequestPasswordReset
+        public: true
+        arguments:
+            - '@c201_ddd.transactions.transaction_manager'
+            - '@c201_security.infrastructure.domain.doctrine.symfony_user_repository'
+            - '@c201_security.domain.generate_password_reset_token'
+            - '@c201_security.domain.request_password_reset_for_user'
+            - '@c201_security.infrastructure.application.symfony.mailer_notify_password_reset'
+
+    C201\Security\Application\RequestPasswordReset:
+        alias: c201_security.infrastructure.application.symfony.request_password_reset
+
+    c201_security.infrastructure.domain.doctrine.find_user_for_password_reset:
+        class: C201\Security\Domain\FindUserForPasswordReset
+        public: false
+        arguments:
+            - '@c201_security.infrastructure.domain.doctrine.symfony_user_repository'
+            - '@c201_security.domain.hash_password_reset_token'
+
+    C201\Security\Domain\FindUserForPasswordReset:
+        alias: c201_security.infrastructure.domain.doctrine.find_user_for_password_reset
+
+    c201_security.infrastructure.application.doctrine.find_user_for_password_reset:
+        class: C201\Security\Application\FindEmailForPasswordReset
+        public: true
+        arguments:
+            - '@c201_security.infrastructure.domain.doctrine.find_user_for_password_reset'
+            - ''
+
+    C201\Security\Application\FindEmailForPasswordReset:
+        alias: c201_security.infrastructure.application.doctrine.find_user_for_password_reset
+
+    c201_security.infrastructure.domain.symfony.reset_password_for_user:
+        class: C201\Security\Domain\ResetPasswordForUser
+        public: false
+        arguments:
+            - '@c201_ddd.events.event_registry'
+            - '@c201_security.infrastructure.domain.symfony.encode_password_for_user'
+
+    C201\Security\Domain\ResetPasswordForUser:
+        alias: c201_security.infrastructure.domain.symfony.reset_password_for_user
+
+    c201_security.infrastructure.application.doctrine.symfony_reset_password:
+        class: C201\Security\Application\ResetPassword
+        public: true
+        arguments:
+            - '@c201_ddd.transactions.transaction_manager'
+            - '@c201_security.infrastructure.domain.doctrine.symfony_user_repository'
+            - '@c201_security.infrastructure.domain.symfony.reset_password_for_user'
+
+    C201\Security\Application\ResetPassword:
+        alias: c201_security.infrastructure.application.doctrine.symfony_reset_password

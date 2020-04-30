@@ -60,4 +60,19 @@ class DoctrineSymfonyUserRepository implements SymfonyUserRepository
 
         return $user;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function findOneByPasswordResetToken(string $token): DoctrineSymfonyUser
+    {
+        /** @var DoctrineSymfonyUser $user */
+        $user = $this->repository->findOneBy(['passwordResetToken' => $token]);
+
+        if (!$user) {
+            throw new UserNotFoundException("No user with password reset token $token found");
+        }
+
+        return $user;
+    }
 }

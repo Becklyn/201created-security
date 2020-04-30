@@ -30,4 +30,10 @@ interface User extends EventProvider
     public function removeRole(string $role): self;
 
     public function changePassword(string $newPassword): self;
+
+    public function requestPasswordReset(string $passwordResetToken): self;
+
+    public function isPasswordResetValid(string $passwordResetToken, int $tokenExpirationMinutes): bool;
+
+    public function resetPassword(string $newPassword): self;
 }

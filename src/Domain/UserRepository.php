@@ -16,4 +16,9 @@ interface UserRepository
      * @throws UserNotFoundException
      */
     public function findOneByEmail(string $email): User;
+
+    /**
+     * @throws UserNotFoundException
+     */
+    public function findOneByPasswordResetToken(string $token): User;
 }

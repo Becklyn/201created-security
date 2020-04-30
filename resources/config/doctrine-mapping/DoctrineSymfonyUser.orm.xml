@@ -26,6 +26,10 @@
 
         <field name="roles" column="roles" type="json"/>
 
+        <field name="passwordResetToken" column="password_reset_token" type="string" length="255" nullable="true" />
+
+        <field name="passwordResetRequestTs" column="password_reset_request_ts" type="datetime_immutable" nullable="true" />
+
         <field name="createdTs" column="created_ts" type="datetime_immutable" nullable="false">
             <gedmo:timestampable on="create"/>
         </field>

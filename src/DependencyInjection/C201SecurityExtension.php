@@ -15,10 +15,22 @@ class C201SecurityExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container)
     {
+        $configuration = new Configuration();
+        $config = $this->processConfiguration($configuration, $configs);
+
         $loader = new YamlFileLoader(
             $container,
             new FileLocator(__DIR__.'/../../resources/config')
         );
         $loader->load('services.yml');
+
+        $definition = $container->getDefinition('c201_security.infrastructure.application.symfony.mailer_notify_password_reset');
+        $definition->replaceArgument(2, $config['reset_password']['route']);
+        $definition->replaceArgument(3, $config['reset_password']['email_from']);
+        $definition->replaceArgument(4, $config['reset_password']['email_subject']);
+
+        $definition = $container->getDefinition('c201_security.infrastructure.application.doctrine.find_user_for_password_reset');
+        $definition->replaceArgument(1, $config['reset_password']['request_expiration_minutes']);
+        $container->setParameter('reset_password.request_expiration_minutes', $config['reset_password']['request_expiration_minutes']);
     }
 }

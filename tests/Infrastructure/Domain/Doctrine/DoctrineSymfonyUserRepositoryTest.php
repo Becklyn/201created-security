@@ -70,4 +70,20 @@ class DoctrineSymfonyUserRepositoryTest extends TestCase
         $this->expectException(UserNotFoundException::class);
         $this->fixture->findOneByEmail($email);
     }
+
+    public function testFindOneByPasswordResetTokenReturnsUserFoundByDoctrineRepository(): void
+    {
+        $token = $this->givenAPasswordResetToken();
+        $user = DoctrineSymfonyUser::create($this->givenAUserId(), $this->givenAnUserEmail(), uniqid());
+        $this->doctrineRepository->findOneBy(['passwordResetToken' => $token])->willReturn($user);
+        $this->assertSame($user, $this->fixture->findOneByPasswordResetToken($token));
+    }
+
+    public function testFindOneByPasswordResetTokenThrowsUserNotFoundExceptionIfDoctrineRepositoryReturnsNull(): void
+    {
+        $token = $this->givenAPasswordResetToken();
+        $this->doctrineRepository->findOneBy(['passwordResetToken' => $token])->willReturn(null);
+        $this->expectException(UserNotFoundException::class);
+        $this->fixture->findOneByPasswordResetToken($token);
+    }
 }
