@@ -3,6 +3,7 @@
 namespace C201\Security\Application;
 
 use C201\Ddd\Transactions\Application\TransactionManager;
+use C201\Security\Domain\CreateUser as DomainCreateUser;
 use C201\Security\Domain\UserId;
 use C201\Security\Domain\UserRepository;
 
@@ -14,12 +15,12 @@ class CreateUser
 {
     private TransactionManager $transactionManager;
     private UserRepository $userRepository;
-    private \C201\Security\Domain\CreateUser $createUser;
+    private DomainCreateUser $createUser;
 
     public function __construct(
         TransactionManager $transactionManager,
         UserRepository $userRepository,
-        \C201\Security\Domain\CreateUser $createUser
+        DomainCreateUser $createUser
     ) {
         $this->transactionManager = $transactionManager;
         $this->userRepository = $userRepository;
