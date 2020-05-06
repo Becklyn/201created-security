@@ -14,20 +14,38 @@ services:
     C201\Security\Domain\UserRepository:
         alias: c201_security.infrastructure.domain.doctrine.symfony_user_repository
 
-    c201_security.infrastructure.application.symfony.create_user:
-        class: C201\Security\Infrastructure\Application\Symfony\SymfonyCreateUser
+    c201_security.infrastructure.domain.doctrine.symfony_user_factory:
+        class: C201\Security\Infrastructure\Domain\Doctrine\DoctrineSymfonyUserFactory
+        public: false
+
+    C201\Security\Infrastructure\Domain\Doctrine\DoctrineSymfonyUserFactory:
+        alias: c201_security.infrastructure.domain.doctrine.symfony_user_factory
+        
+    C201\Security\Domain\UserFactory:
+        alias: c201_security.infrastructure.domain.doctrine.symfony_user_factory
+        
+    c201_security.infrastructure.domain.doctrine.symfony_create_user:
+        class: C201\Security\Domain\CreateUser
+        public: false
+        arguments:
+            - '@c201_ddd.events.event_registry'
+            - '@c201_security.infrastructure.domain.doctrine.symfony_user_factory'
+            - '@c201_security.infrastructure.domain.symfony.encode_password_for_user'
+            - '@c201_security.infrastructure.domain.doctrine.symfony_user_repository'
+
+    C201\Security\Domain\CreateUser:
+        alias: c201_security.infrastructure.domain.doctrine.symfony_create_user
+        
+    c201_security.infrastructure.application.doctrine.symfony_create_user:
+        class: C201\Security\Application\CreateUser
         public: true
         arguments:
             - '@c201_ddd.transactions.transaction_manager'
-            - '@c201_ddd.events.event_registry'
-            - '@Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface'
             - '@c201_security.infrastructure.domain.doctrine.symfony_user_repository'
-
-    C201\Security\Infrastructure\Application\Symfony\SymfonyCreateUser:
-        alias: c201_security.infrastructure.application.symfony.create_user
+            - '@c201_security.infrastructure.domain.doctrine.symfony_create_user'
 
     C201\Security\Application\CreateUser:
-        alias: c201_security.infrastructure.application.symfony.create_user
+        alias: c201_security.infrastructure.application.doctrine.symfony_create_user
 
     c201_security.infrastructure.domain.symfony.encode_password_for_user:
         class: C201\Security\Infrastructure\Domain\Symfony\SymfonyEncodePasswordForUser
@@ -74,13 +92,13 @@ services:
     C201\Security\Application\Security:
         alias: c201_security.infrastructure.application.symfony.security_helper
 
-    c201_security.infrastructure.application.symfony.create_user_command:
+    c201_security.infrastructure.application.doctrine.symfony_create_user_command:
         class: C201\Security\Infrastructure\Delivery\Cli\Symfony\CreateUserCommand
         public: false
         tags:
             - { name: 'console.command', command: 'c201:security:create-user' }
         arguments:
-            - '@c201_security.infrastructure.application.symfony.create_user'
+            - '@c201_security.infrastructure.application.doctrine.symfony_create_user'
 
     c201_security.infrastructure.application.doctrine.symfony_change_password_command:
         class: C201\Security\Infrastructure\Delivery\Cli\Symfony\ChangePasswordCommand

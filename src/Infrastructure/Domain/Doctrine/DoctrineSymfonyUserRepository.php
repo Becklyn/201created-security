@@ -6,7 +6,6 @@ use C201\Security\Domain\User;
 use C201\Security\Domain\UserId;
 use C201\Security\Domain\UserNotFoundException;
 use C201\Security\Infrastructure\Domain\Symfony\SymfonyUserRepository;
-use Ramsey\Uuid\Uuid;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 
@@ -34,7 +33,7 @@ class DoctrineSymfonyUserRepository implements SymfonyUserRepository
 
     public function nextIdentity(): UserId
     {
-        return UserId::fromString(Uuid::uuid4());
+        return UserId::next();
     }
 
     /**
